@@ -1,0 +1,502 @@
+/*%FSM<COMPILE "G:\Steam\steamapps\common\Arma 3 Tools\FSMEditor\scriptedFSM.cfg, SquadBehavior">*/
+/*%FSM<HEAD>*/
+/*
+item0[] = {"GeneratePlan",0,250,-73.854919,-517.110779,46.417297,-441.495911,0.000000,"GeneratePlan"};
+item1[] = {"Execute_Plan_",2,250,-57.255249,-359.128571,32.744766,-309.128540,0.000000,"Execute(Plan)"};
+item2[] = {"KnowsAbout_Enemy",4,218,-81.982269,-287.456757,59.594757,-231.857849,0.000000,"KnowsAbout(Enemy)"};
+item3[] = {"IsWeak_Group_",4,218,64.411728,-287.418854,179.640427,-231.596893,0.000000,"IsWeak(Group)"};
+item4[] = {"GenerateNewPlan",2,250,-371.902557,-428.011017,-242.315857,-377.234863,0.000000,"GenerateNewPlan"};
+item5[] = {"__IsAlive_Group",4,218,67.484985,-430.874084,191.892029,-366.912231,0.000000,"!IsAlive(Group)"};
+item6[] = {"EndPlanning",1,250,213.782959,-422.461212,303.782990,-372.461243,0.000000,"EndPlanning"};
+item7[] = {"Stronger_Group_",4,218,-498.403625,-348.878998,-339.831055,-300.428894,0.000000,"Stronger(Group, Enemy)"};
+item8[] = {"Created_Plan_",8,218,-83.538635,-425.614349,56.675171,-374.257263,0.000000,"Created(Plan)"};
+item9[] = {"Stronger_Enemy_",4,218,-372.204681,-365.938629,-214.432953,-314.974945,0.000000,"Stronger(Enemy, Group)"};
+item10[] = {"_",-1,250,241.977722,28.353516,241.977722,52.285400,0.000000,""};
+item11[] = {"Completed_Plan_",4,4314,-249.574036,-512.961548,-132.228256,-440.908478,0.000000,"Completed(Plan)"};
+item12[] = {"Assess_Enemy_",2,250,-361.560333,-258.850159,-251.183350,-208.850159,0.000000,"Assess(Enemy)"};
+item13[] = {"NotAThreat_Enemy",4,218,-266.666351,-324.075409,-120.732910,-272.603668,1.000000,"NotAThreat(Enemy)"};
+item14[] = {"Assess_Group_",2,250,194.995148,-284.320801,319.877533,-234.320801,0.000000,"Assess(Group)"};
+item15[] = {"FriendliesNearby",4,218,115.332672,-360.126984,245.977081,-304.655609,0.000000,"FriendliesNearby"};
+item16[] = {"__FriendliesNear",4,218,256.162720,-360.452637,396.968262,-301.854736,0.000000,"!FriendliesNearby"};
+version=1;
+class LayoutItems
+{
+	class Item10
+	{
+		class ItemInfo
+		{
+			FontFace="Arial";
+			FontHeight=10;
+			lStyle=1;
+		};
+		BgColor=65535;
+	};
+};
+link0[] = {0,8};
+link1[] = {1,2};
+link2[] = {1,3};
+link3[] = {1,5};
+link4[] = {1,11};
+link5[] = {2,12};
+link6[] = {3,14};
+link7[] = {4,8};
+link8[] = {5,6};
+link9[] = {7,4};
+link10[] = {8,1};
+link11[] = {9,4};
+link12[] = {11,4};
+link13[] = {12,7};
+link14[] = {12,9};
+link15[] = {12,13};
+link16[] = {13,1};
+link17[] = {14,15};
+link18[] = {14,16};
+link19[] = {15,6};
+link20[] = {16,6};
+globals[] = {0.000000,0,0,0,0,640,480,1,37,6316128,1,-447.388580,214.481628,41.974792,-666.372925,826,884,1};
+window[] = {2,-1,-1,-32000,-32000,899,2265,3624,131,3,844};
+*//*%FSM</HEAD>*/
+class FSM
+{
+        fsmName = "SquadBehavior";
+        class States
+        {
+                /*%FSM<STATE "GeneratePlan">*/
+                class GeneratePlan
+                {
+                        name = "GeneratePlan";
+                        itemno = 0;
+                        init = /*%FSM<STATEINIT""">*/"/*" \n
+                         "	Author: Trenchgun" \n
+                         "" \n
+                         "	Description:" \n
+                         "	Initializes a passed group's plan generation." \n
+                         "" \n
+                         "	Parameter(s):" \n
+                         "		0: GROUP - group that is being controlled" \n
+                         "		1: 2D ARRAY - [[OBJ_POS, ""TYPE""], [OBJ_POS, ""TYPE""]]" \n
+                         "		2: ARRAY - list of unknown enemy forces" \n
+                         "		3: ARRAY - list of friendly forces" \n
+                         "" \n
+                         "*/" \n
+                         "" \n
+                         "// imported variables" \n
+                         "_group = _this select 0;" \n
+                         "_objList = _this select 1;" \n
+                         "_enemyForceUnknown = _this select 2;" \n
+                         "_force = _this select 3;" \n
+                         "" \n
+                         "_force = _force - [ _group ];" \n
+                         "" \n
+                         "// intel about our group" \n
+                         "_maxStrength = count units _group;" \n
+                         "" \n
+                         "// enemy trackers" \n
+                         "_enemyForceKnown = [];" \n
+                         "_oldEnemyForceKnown = [];" \n
+                         "_target = grpNull;" \n
+                         "_oldTarget = grpNull;" \n
+                         "" \n
+                         "_objEntry = _objList select 0;" \n
+                         "_primaryObjPos = _objEntry select 0;" \n
+                         "_primaryObjType = _objEntry select 1;" \n
+                         "" \n
+                         "_style = selectRandom [""LEFT"", ""RIGHT"", ""CENTER""];" \n
+                         "systemChat format [""%1 is generating initial %2 plan..."", _group, _primaryObjType];" \n
+                         "[_group, _primaryObjPos, _primaryObjType, _style] call BOTCOM_fnc_generatePlan;" \n
+                         "" \n
+                         "//_result = diag_codePerformance [BOTCOM_fnc_generatePlan, [_group, _primaryObjPos, _primaryObjType, _style], 1000];" \n
+                         "" \n
+                         "systemChat format [""%1 initial plan generated."", _group];"/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                                /*%FSM<LINK "Created_Plan_">*/
+                                class Created_Plan_
+                                {
+                                        itemno = 8;
+                                        priority = 0.000000;
+                                        to="Execute_Plan_";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"true"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                        };
+                };
+                /*%FSM</STATE>*/
+                /*%FSM<STATE "Execute_Plan_">*/
+                class Execute_Plan_
+                {
+                        name = "Execute_Plan_";
+                        itemno = 1;
+                        init = /*%FSM<STATEINIT""">*/"// get list of enemy units" \n
+                         "//_oldEnemyForceKnown = _enemyForceKnown;" \n
+                         "" \n
+                         "" \n
+                         "" \n
+                         ""/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                                /*%FSM<LINK "IsWeak_Group_">*/
+                                class IsWeak_Group_
+                                {
+                                        itemno = 3;
+                                        priority = 0.000000;
+                                        to="Assess_Group_";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"// check if the group has suffered too many casualties" \n
+                                         "(count units _group) <= (_maxStrength / 2)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"systemChat format [""%1 sustained too many casualties, looking for allied squad to join...""];" \n
+                                         "" \n
+                                         "// remove waypoints of unit" \n
+                                         "while {(count (waypoints _group)) > 0} do {" \n
+                                         "	deleteWaypoint ((waypoints _group) select 0);" \n
+                                         "};" \n
+                                         "" \n
+                                         "" \n
+                                         "" \n
+                                         ""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "__IsAlive_Group">*/
+                                class __IsAlive_Group
+                                {
+                                        itemno = 5;
+                                        priority = 0.000000;
+                                        to="EndPlanning";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"// check if the group is dead" \n
+                                         "({alive _x} count units _group) == 0"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"systemChat format [""%1 has been destroyed."", _group];"/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "Completed_Plan_">*/
+                                class Completed_Plan_
+                                {
+                                        itemno = 11;
+                                        priority = 0.000000;
+                                        to="GenerateNewPlan";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"// check if all waypoints have been completed" \n
+                                         "//(count (waypoints _group)) == 0" \n
+                                         "" \n
+                                         "(currentWaypoint _group) == 0;" \n
+                                         "//(currentWaypoint group1 == count (waypoints group1))" \n
+                                         "" \n
+                                         "//!((currentWaypoint _group) in (waypoints _group))"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"// remove current objective from stack" \n
+                                         "_completedObj = _objList deleteAt 0;" \n
+                                         "//_objList = _objList - _objEntry;" \n
+                                         "" \n
+                                         "// remove waypoints of unit" \n
+                                         "while {(count (waypoints _group)) > 0} do {" \n
+                                         "	deleteWaypoint ((waypoints _group) select 0);" \n
+                                         "};" \n
+                                         "" \n
+                                         "systemChat format [""%1 has completed its current plan."", _group];"/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "KnowsAbout_Enemy">*/
+                                class KnowsAbout_Enemy
+                                {
+                                        itemno = 2;
+                                        priority = 0.000000;
+                                        to="Assess_Enemy_";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/"_unitsUnknown = [];" \n
+                                         "{" \n
+                                         "	_unitsToAdd = units _x;" \n
+                                         "	_unitsUnknown append _unitsToAdd;" \n
+                                         "} forEach _enemyForceUnknown;" \n
+                                         "" \n
+                                         "{" \n
+                                         "	_knowledge = (leader _group knowsAbout _x);" \n
+                                         "	if (_knowledge > 0) then {" \n
+                                         "		_enemyForceKnown pushBack (group _x);" \n
+                                         "	};" \n
+                                         "} forEach _unitsUnknown;" \n
+                                         "" \n
+                                         "//_enemyForceUnknown = _enemyForceUnknown - _enemyForceKnown;"/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"// check if the group knows about any enemy groups" \n
+                                         "(count _enemyForceKnown > 0) && (_target != _oldTarget)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"" \n
+                                         "" \n
+                                         "" \n
+                                         "/*" \n
+                                         "_nearestEnemy = (leader _group) findNearestEnemy (leader _group);" \n
+                                         "" \n
+                                         "systemChat format [""%1 discovered an enemy force."", _group];" \n
+                                         "*/"/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                        };
+                };
+                /*%FSM</STATE>*/
+                /*%FSM<STATE "GenerateNewPlan">*/
+                class GenerateNewPlan
+                {
+                        name = "GenerateNewPlan";
+                        itemno = 4;
+                        init = /*%FSM<STATEINIT""">*/"// create new plan" \n
+                         "" \n
+                         "" \n
+                         "" \n
+                         "" \n
+                         "// make sure we still have objectives to complete" \n
+                         "if (count _objList > 0) then {" \n
+                         "	_objEntry = _objList select 0;" \n
+                         "" \n
+                         "	_primaryObjPos = _objEntry select 0;" \n
+                         "	_primaryObjType = _objEntry select 1;" \n
+                         "	_style = selectRandom [""LEFT"", ""RIGHT"", ""CENTER""];" \n
+                         "} else {" \n
+                         "	// otherwise, create a DEFEND objective at current location" \n
+                         "	// try keeping it at previous position?" \n
+                         "	_primaryObjPos = getPos (leader _group);" \n
+                         "	_primaryObjType = ""DEFEND"";" \n
+                         "	_style = ""none"";" \n
+                         "};" \n
+                         "systemChat format [""%1 is generating a new %2 plan..."", _group, _primaryObjType];" \n
+                         "// execute the planning script" \n
+                         "[_group, _primaryObjPos, _primaryObjType, _style] call BOTCOM_fnc_generatePlan;" \n
+                         "systemChat format [""%1 finished generating a plan."", _group];"/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                                /*%FSM<LINK "Created_Plan_">*/
+                                class Created_Plan_
+                                {
+                                        itemno = 8;
+                                        priority = 0.000000;
+                                        to="Execute_Plan_";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"true"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                        };
+                };
+                /*%FSM</STATE>*/
+                /*%FSM<STATE "EndPlanning">*/
+                class EndPlanning
+                {
+                        name = "EndPlanning";
+                        itemno = 6;
+                        init = /*%FSM<STATEINIT""">*/"systemChat format [""Planning concluded for %1."", _group];"/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                        };
+                };
+                /*%FSM</STATE>*/
+                /*%FSM<STATE "Assess_Enemy_">*/
+                class Assess_Enemy_
+                {
+                        name = "Assess_Enemy_";
+                        itemno = 12;
+                        init = /*%FSM<STATEINIT""">*/""/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/"_isClosest = true;" \n
+                         "" \n
+                         "// find average distance to each enemy squad" \n
+                         "_distToEnemies = [];" \n
+                         "{" \n
+                         "	_dist = 0;" \n
+                         "	{" \n
+                         "		_dist = (leader _group) distance _x;" \n
+                         "		_dist = _dist + _dist;" \n
+                         "	} forEach units _x;" \n
+                         "	_dist = _dist / (count units _x);" \n
+                         "	_distToEnemies pushBack _dist;" \n
+                         "} forEach _enemyForceKnown;" \n
+                         "" \n
+                         "_smallest = selectMin _distToEnemies;" \n
+                         "_index = _distToEnemies find _smallest;" \n
+                         "" \n
+                         "// find average distance of each friendly squad to closest enemy squad" \n
+                         "_friendlyDistance = [];" \n
+                         "{" \n
+                         "	_step = _x;" \n
+                         "	_dist = 0;" \n
+                         "	{" \n
+                         "		_dist = (leader _step) distance (leader _x);" \n
+                         "		_dist = _dist + _dist;" \n
+                         "	} forEach units (_enemyForceKnown select _index);	" \n
+                         "	_dist = _dist / (count units (_enemyForceKnown select _index));" \n
+                         "	_distToEnemies pushBack _dist;" \n
+                         "} forEach _force;" \n
+                         "" \n
+                         "// check if any friendlies are closer to the closest enemy squad" \n
+                         "{" \n
+                         "	scopeName = ""loop"";" \n
+                         "	if (_x < _smallest) then {" \n
+                         "		isClosest = false;" \n
+                         "		breakOut ""loop"";" \n
+                         "	};" \n
+                         "} forEach _friendlyDistance;" \n
+                         "" \n
+                         ""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                                /*%FSM<LINK "NotAThreat_Enemy">*/
+                                class NotAThreat_Enemy
+                                {
+                                        itemno = 13;
+                                        priority = 1.000000;
+                                        to="Execute_Plan_";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"(!_isClosest)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "Stronger_Enemy_">*/
+                                class Stronger_Enemy_
+                                {
+                                        itemno = 9;
+                                        priority = 0.000000;
+                                        to="GenerateNewPlan";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/"//_nearestEnemy = (leader _group) findNearestEnemy (leader _group);" \n
+                                         "_nearestEnemy = leader (_enemyForceKnown select 0);"/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"(count units (group _nearestEnemy)) > (count units _group)" \n
+                                         "/*" \n
+                                         "// get some intel" \n
+                                         "_currentPos = (getPos Leader _group);" \n
+                                         "_nearestEnemy = (leader _group) findNearestEnemy (leader _group);" \n
+                                         "_distToEnemy = _currentPos distance _nearestEnemy;" \n
+                                         "" \n
+                                         "// find the nearest friendly" \n
+                                         "_closerToFriendlies = false;" \n
+                                         "_nearestUnits = nearestObjects [_currentPos, [""Man""], 200];" \n
+                                         "_nearestFriendlies = [];" \n
+                                         "" \n
+                                         "if (west countSide _nearestUnits > 0 then {" \n
+                                         "	{" \n
+                                         "		if (side _x == west then {_nearestFriendlies pushBack _x};" \n
+                                         "	} forEach _nearestUnits;" \n
+                                         "};" \n
+                                         "" \n
+                                         "// see if the group is closer to friendlies than they are enemies" \n
+                                         "{" \n
+                                         "	if (_distToEnemy > (_currentPos distance _x)) then {" \n
+                                         "		_closerToFriendlies = true;" \n
+                                         "	};" \n
+                                         "} forEach _nearestFriendlies;" \n
+                                         "" \n
+                                         "_closerToFriendlies" \n
+                                         "*/"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"// make a new DEFEND objevtive at top of objective stack" \n
+                                         "_oldTarget = _target;" \n
+                                         "_target = (group _nearestEnemy);" \n
+                                         "_popObj = [[getPos (leader _group), ""DEFEND""]];" \n
+                                         "_popObj append _objList;" \n
+                                         "_objList = _popObj;" \n
+                                         "" \n
+                                         "//systemChat format [""_objList = %1"", _objList];" \n
+                                         "systemChat format [""%1 discovered an enemy force."", _group];" \n
+                                         "systemChat ""That force is stronger."";" \n
+                                         "/*" \n
+                                         "_joinPos = getPos _nearestFriendlies select 0;" \n
+                                         "_join = _group addWaypoint [_joinPos, -1];" \n
+                                         "_join setWaypointType ""JOIN"";" \n
+                                         "systemChat format [""%1 has joined %2."", _group, (group (_nearestFriendlies select 0))];" \n
+                                         "*/" \n
+                                         "" \n
+                                         "" \n
+                                         ""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "Stronger_Group_">*/
+                                class Stronger_Group_
+                                {
+                                        itemno = 7;
+                                        priority = 0.000000;
+                                        to="GenerateNewPlan";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/"//_nearestEnemy = (leader _group) findNearestEnemy (leader _group);" \n
+                                         "_nearestEnemy = leader (_enemyForceKnown select 0);" \n
+                                         ""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"((count units (group _nearestEnemy)) <= (count units _group)) && (_isClosest)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"// make a new ATTACK objevtive at top of objective stack" \n
+                                         "_oldTarget = _target;" \n
+                                         "_target = (group _nearestEnemy);" \n
+                                         "_popObj = [[getPos (_nearestEnemy), ""ATTACK""]];" \n
+                                         "_popObj append _objList;" \n
+                                         "_objList = _popObj;" \n
+                                         "" \n
+                                         "//systemChat format [""_objList = %1"", _objList];" \n
+                                         "" \n
+                                         "systemChat format [""%1 discovered an enemy force."", _group];" \n
+                                         "systemChat ""That force is weaker/equivalent."";"/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                        };
+                };
+                /*%FSM</STATE>*/
+                /*%FSM<STATE "Assess_Group_">*/
+                class Assess_Group_
+                {
+                        name = "Assess_Group_";
+                        itemno = 14;
+                        init = /*%FSM<STATEINIT""">*/""/*%FSM</STATEINIT""">*/;
+                        precondition = /*%FSM<STATEPRECONDITION""">*/"_currentPos = (getPos leader _group);" \n
+                         "" \n
+                         "_nearestUnits = nearestObjects [_currentPos, [""Man""], 200];" \n
+                         "_nearestFriendlies = [];" \n
+                         "" \n
+                         "" \n
+                         "if (west countSide _nearestUnits > 0) then {" \n
+                         "	{" \n
+                         "		if (side _x == west) then {_nearestFriendlies pushBack _x};" \n
+                         "	} forEach _nearestUnits;" \n
+                         "};" \n
+                         ""/*%FSM</STATEPRECONDITION""">*/;
+                        class Links
+                        {
+                                /*%FSM<LINK "__FriendliesNear">*/
+                                class __FriendliesNear
+                                {
+                                        itemno = 16;
+                                        priority = 0.000000;
+                                        to="EndPlanning";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"((count _nearestFriendlies) == 0)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"_nearestEnemy = (leader _group) findNearestEnemy (leader _group);" \n
+                                         "_dirToEnemy = _nearestEnemy getDir _currentPos;" \n
+                                         "_distToEnemy = _currentPos distance _nearestEnemy;" \n
+                                         "_retreatDir = _dirToEnemy;" \n
+                                         "" \n
+                                         "" \n
+                                         "_retreatPos = _currentPos getPos [500, _retreatDir];" \n
+                                         "_retreat = _group addWaypoint [_retreatPos, -1];" \n
+                                         "_retreat setWaypointType ""MOVE"";" \n
+                                         "_group setCombatMode ""GREEN"";" \n
+                                         "" \n
+                                         "systemChat format [""No friendlies found, %1 is retreating."", _group];"/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                                /*%FSM<LINK "FriendliesNearby">*/
+                                class FriendliesNearby
+                                {
+                                        itemno = 15;
+                                        priority = 0.000000;
+                                        to="EndPlanning";
+                                        precondition = /*%FSM<CONDPRECONDITION""">*/""/*%FSM</CONDPRECONDITION""">*/;
+                                        condition=/*%FSM<CONDITION""">*/"((count _nearestFriendlies) > 0)"/*%FSM</CONDITION""">*/;
+                                        action=/*%FSM<ACTION""">*/"_join = _group addWaypoint [_nearestFriendlies select 0, -1];" \n
+                                         "_join setWaypointType ""JOIN"";" \n
+                                         "_group setCombatMode ""GREEN"";" \n
+                                         "" \n
+                                         "systemChat format [""%1 survivor is joining %2"", _group, _nearestFriendlies select 0];" \n
+                                         ""/*%FSM</ACTION""">*/;
+                                };
+                                /*%FSM</LINK>*/
+                        };
+                };
+                /*%FSM</STATE>*/
+        };
+        initState="GeneratePlan";
+        finalStates[] =
+        {
+                "EndPlanning",
+        };
+};
+/*%FSM</COMPILE>*/

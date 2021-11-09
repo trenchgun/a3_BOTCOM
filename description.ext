@@ -1,0 +1,11 @@
+//-------------------- Mission Information
+
+author = "Trenchgun";
+
+joinUnassigned = 0;
+skipLobby = 1;
+
+class CfgFunctions
+{
+	#include "config\CfgFunctions.hpp"
+};
